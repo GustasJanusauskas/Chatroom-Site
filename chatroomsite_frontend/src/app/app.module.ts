@@ -5,6 +5,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { MatIconModule } from "@angular/material/icon";
 import {MatInputModule} from '@angular/material/input';
 import {MatCardModule} from '@angular/material/card'; 
+import {MatButtonModule} from '@angular/material/button'; 
 
 import { AppComponent } from './app.component';
 import { ChatComponent } from './chat/chat.component';
@@ -24,7 +25,8 @@ import { RegisterComponent } from './register/register.component';
     AppRoutingModule,
     MatIconModule,
     MatInputModule,
-    MatCardModule
+    MatCardModule,
+    MatButtonModule
   ],
   providers: [],
   bootstrap: [AppComponent]

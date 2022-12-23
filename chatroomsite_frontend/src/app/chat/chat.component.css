@@ -15,11 +15,17 @@
     background-color: var(--fg-colour)
 }
 
-.RoomSearchBar {
+.RoomSearchBar, .ChatInput {
     width: 100%;
+    height: 3rem;
 }
 
 .RoomList {
     overflow-y: auto;
     max-height: 42rem;
+}
+
+.ChatViewport {
+    height: calc(100% - 6rem);
+    overflow-y: auto;
 }
