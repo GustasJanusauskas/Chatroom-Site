@@ -3,16 +3,8 @@
 }
 
 .RoomBar, .ChatBar {
-    border-radius: 0.5rem;
-    height: 50rem;
-}
-
-.RoomBar {
-    background-color: var(--fg-colour)
-}
-
-.ChatBar {
-    background-color: var(--fg-colour)
+    min-height: 50rem;
+    background-color: var(--bg-colour);
 }
 
 .RoomSearchBar, .ChatInput {
@@ -20,12 +12,15 @@
     height: 3rem;
 }
 
-.RoomList {
+.RoomList, .ChatViewport {
     overflow-y: auto;
-    max-height: 42rem;
+}
+
+.RoomList {
+    max-height: 44.75rem;
 }
 
 .ChatViewport {
-    height: calc(100% - 6rem);
-    overflow-y: auto;
+    max-height: 42rem;
+    height: calc(100% - 10rem - 0.5rem);
 }

@@ -7,26 +7,34 @@
                     <mat-label>Search rooms</mat-label>
                     <input matInput placeholder="Please enter room name.">
                 </mat-form-field>
-                <div class="RoomList ">
+                <div class="RoomList">
                     <mat-card class="RoomCard mt-2" *ngFor="let room of rooms">
                         <mat-card-header>
-                          <img mat-card-avatar [src]="room.imagePath || 'assets/defaultProfile.png'" />
-                          <mat-card-title>{{room.name}}</mat-card-title>
-                          <mat-card-subtitle>{{room.name}}</mat-card-subtitle>
+                            <img mat-card-avatar [src]="room.imagePath || 'assets/defaultProfile.png'" />
+                            <mat-card-title>{{room.name}}</mat-card-title>
+                            <mat-card-subtitle>{{room.name}}</mat-card-subtitle>
                         </mat-card-header>
                     </mat-card>
                 </div>
             </div>
         
             <div class="ChatBar col-8">
-                <div class="ChatViewport mb-2">
-                    aaa
+                <h2>{{currentRoom.name}}</h2>
+                <div class="ChatViewport">
+                    <mat-card class="MessageCard mt-2" *ngFor="let message of messages">
+                        <mat-card-subtitle>{{message.author}}</mat-card-subtitle>
+                        <mat-card-content>{{message.body}}</mat-card-content>
+                        <mat-card-subtitle>Sent {{message.date}}</mat-card-subtitle>
+                        <mat-card-actions>
+                            <button mat-button color="accent"><mat-icon style="vertical-align:text-bottom;">reply</mat-icon>&ThickSpace;&ThickSpace;Reply</button>
+                        </mat-card-actions>
+                    </mat-card>
                 </div>
                 <mat-form-field class="ChatInput mt-2">
                     <mat-label>Send message</mat-label>
                     <input matInput placeholder="Please enter your message.">
                 </mat-form-field>
-                <button mat-button color="primary" class="ChatInput"><mat-icon>send</mat-icon>&ThickSpace; Send message</button>
+                <button mat-button color="primary" class="ChatInput mt-2"><mat-icon>send</mat-icon>&ThickSpace; Send message</button>
             </div>
         </div>
     </div>
