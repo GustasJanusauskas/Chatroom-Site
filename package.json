@@ -1,0 +1,21 @@
+{
+  "name": "chatroomsite",
+  "version": "1.0.0",
+  "description": "Chatroom site, rewritten from scratch to use Angular, NodeJS and PostgreSQL.\r ### Features\r - Login/Register system\r - Room system\r - Uploading of files/images\r - Automatic embedding of linked youtube videos/images",
+  "main": "server/index.js\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[\\",
+  "scripts": {
+    "compilerun": "cd chatroomsite_frontend && ng build && cd .. && npm start",
+    "dev": "cd chatroomsite_frontend && npm start",
+    "start": "node server/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GustasJanusauskas/Chatroom-Site.git"
+  },
+  "author": "Gustas Janusauskas",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GustasJanusauskas/Chatroom-Site/issues"
+  },
+  "homepage": "https://github.com/GustasJanusauskas/Chatroom-Site#readme"
+}

@@ -1,0 +1,25 @@
+#ChatMain {
+    color: var(--text-colour);
+}
+
+.RoomBar, .ChatBar {
+    border-radius: 0.5rem;
+    height: 50rem;
+}
+
+.RoomBar {
+    background-color: var(--fg-colour)
+}
+
+.ChatBar {
+    background-color: var(--fg-colour)
+}
+
+.RoomSearchBar {
+    width: 100%;
+}
+
+.RoomList {
+    overflow-y: auto;
+    max-height: 42rem;
+}

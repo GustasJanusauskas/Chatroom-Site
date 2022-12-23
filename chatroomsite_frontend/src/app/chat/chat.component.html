@@ -1,0 +1,26 @@
+<div id="ChatMain">
+    <div class="container">
+        <div class="row mt-4">
+            <div class="RoomBar col me-3">
+                <h1>Rooms</h1>
+                <mat-form-field class="RoomSearchBar">
+                    <mat-label>Search rooms</mat-label>
+                    <input matInput placeholder="Please enter room name.">
+                </mat-form-field>
+                <div class="RoomList ">
+                    <mat-card class="RoomCard mt-2" *ngFor="let room of rooms">
+                        <mat-card-header>
+                          <img mat-card-avatar [src]="room.imagePath || 'assets/defaultProfile.png'" />
+                          <mat-card-title>{{room.name}}</mat-card-title>
+                          <mat-card-subtitle>{{room.name}}</mat-card-subtitle>
+                        </mat-card-header>
+                    </mat-card>
+                </div>
+            </div>
+        
+            <div class="ChatBar col-8">
+                TODO
+            </div>
+        </div>
+    </div>
+</div>

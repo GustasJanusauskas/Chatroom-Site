@@ -11,11 +11,11 @@ const VERBOSE_DEBUG = false;
 
 //DB Config
 const dbclient = new PGClient({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'socialsitedb',
-  password: 'root',
-  port: 5432
+  user: process.env.USER || 'postgres',
+  host: process.env.HOST || 'localhost',
+  database: process.env.DATABASE || 'chatroomsitedb',
+  password: process.env.PASSWORD || 'root',
+  port: process.env.DB_PORT || 5432
 }); dbclient.connect();
 
 
