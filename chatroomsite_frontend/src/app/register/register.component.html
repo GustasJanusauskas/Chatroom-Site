@@ -1,1 +1,28 @@
-<p>register works!</p>
+<div id="RegisterMain">
+    <div class="container">
+        <h1>Register</h1>
+        <br>
+        <mat-form-field class="LongInput mt-2" appearance="fill">
+            <mat-label>Email</mat-label>
+            <input matInput maxlength="256" type="email" placeholder="Please enter your email." [formControl]="email" autocomplete="off">
+            <mat-hint align="end">{{email.value!.length || 0}}/256</mat-hint>
+            <mat-error *ngIf="email.invalid">{{getErrorMsg(email)}}</mat-error>
+        </mat-form-field>
+        <br>
+        <mat-form-field class="LongInput mt-2" appearance="fill">
+            <mat-label>Username</mat-label>
+            <input matInput maxlength="256" type="text" placeholder="Please enter your username." [formControl]="username" autocomplete="off">
+            <mat-hint align="end">{{username.value!.length || 0}}/256</mat-hint>
+            <mat-error *ngIf="username.invalid">{{getErrorMsg(username)}}</mat-error>
+        </mat-form-field>
+        <br>
+        <mat-form-field class="LongInput mt-2" appearance="fill">
+            <mat-label>Password</mat-label>
+            <input matInput maxlength="256" type="password" placeholder="Please enter your password." [formControl]="password" autocomplete="off">
+            <mat-hint align="end">{{password.value!.length || 0}}/256</mat-hint>
+            <mat-error *ngIf="password.invalid">{{getErrorMsg(password)}}</mat-error>
+        </mat-form-field>
+        <br>
+        <button mat-button color="primary" class="LongInput mt-2" (click)="register()"><mat-icon>login</mat-icon>&ThickSpace; Register</button>
+    </div>
+</div>

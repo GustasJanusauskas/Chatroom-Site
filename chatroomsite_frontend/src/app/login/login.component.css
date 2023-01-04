@@ -1,0 +1,8 @@
+#LoginMain {
+    text-align: center;
+    color: var(--text-colour);
+}
+
+@media only screen and (max-width: 900px) {
+
+}
