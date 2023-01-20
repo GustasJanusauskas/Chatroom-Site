@@ -1,5 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, Validators } from "@angular/forms";
+import {MatSnackBar} from '@angular/material/snack-bar';
+
+import { UserdataService } from "../services/userdata.service";
+import { HelperFunctionsService } from "../services/helper-functions.service";
 
 @Component({
   selector: 'app-register',
@@ -12,7 +16,7 @@ export class RegisterComponent implements OnInit {
   password = new FormControl("", [Validators.minLength(8),Validators.required] );
 
 
-  constructor() { 
+  constructor(private userdataservice: UserdataService, private snackBar: MatSnackBar) { 
 
   }
 
@@ -31,12 +35,18 @@ export class RegisterComponent implements OnInit {
   register(): void {
     if (this.username.invalid || this.password.invalid || this.email.invalid) return;
 
-    //on success
-    this.email.markAsUntouched();
-    this.username.markAsUntouched();
-    this.password.markAsUntouched();
-    this.email.setValue('');
-    this.username.setValue('');
-    this.password.setValue('');
+    this.userdataservice.registerUser(this.username.value!,this.password.value!,this.email.value!).subscribe( data => {
+      if (data.error) return;
+
+      //on success
+      this.email.markAsUntouched();
+      this.username.markAsUntouched();
+      this.password.markAsUntouched();
+      this.email.setValue('');
+      this.username.setValue('');
+      this.password.setValue('');
+
+      this.snackBar.open('Account created successfully! You can now log in.','OK');
+    });
   }
 }

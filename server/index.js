@@ -17,6 +17,8 @@ const dbclient = new PGClient({
   password: process.env.PASSWORD || 'root',
   port: process.env.DB_PORT || 5432
 }); dbclient.connect();
+//Set DB connection as a global var
+app.set('db',dbclient);
 
 
 //Max size per single request
@@ -28,6 +30,8 @@ app.use(express.static(path.join(__dirname,'..',String.raw`chatroomsite_frontend
 
 //Routing
 app.get('/', routes.getroot);
+app.post('/register',routes.register);
+app.post('/login',routes.login);
 
 app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);

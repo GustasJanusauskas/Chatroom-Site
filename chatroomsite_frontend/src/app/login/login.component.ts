@@ -1,5 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, Validators } from "@angular/forms";
+import {Router} from "@angular/router"
+import {MatSnackBar} from '@angular/material/snack-bar';
+
+import { UserdataService } from "../services/userdata.service";
+import { HelperFunctionsService } from "../services/helper-functions.service";
 
 @Component({
   selector: 'app-login',
@@ -11,7 +16,7 @@ export class LoginComponent implements OnInit {
   password = new FormControl("", [Validators.minLength(8),Validators.required] );
 
 
-  constructor() { 
+  constructor(private userdataservice: UserdataService, private router: Router, private snackBar: MatSnackBar) { 
 
   }
 
@@ -30,10 +35,20 @@ export class LoginComponent implements OnInit {
   login(): void {
     if (this.username.invalid || this.password.invalid) return;
 
-    //on success
-    this.username.markAsUntouched();
-    this.password.markAsUntouched();
-    this.username.setValue('');
-    this.password.setValue('');
+    this.userdataservice.loginUser(this.username.value!,this.password.value!).subscribe( data => {
+      if (data.error) return;
+
+      HelperFunctionsService.setCookie('session',data.session);
+
+      //on success
+      this.username.markAsUntouched();
+      this.password.markAsUntouched();
+      this.username.setValue('');
+      this.password.setValue('');
+
+      this.snackBar.open('Logged in successfully.','OK');
+      //redirect back to main page
+      this.router.navigate(['/']);
+    });
   }
 }
