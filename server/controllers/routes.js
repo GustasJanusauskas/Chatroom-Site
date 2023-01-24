@@ -8,7 +8,11 @@ const { appendFile } = require("fs");
 module.exports = {
     getroot: function (req,res) {
         res.sendFile(path.join(__dirname,'..',String.raw`chatroomsite_frontend\dist\chatroomsite_frontend\index.html`));
-    }, //TODO: Write DB SQL, add on delete cascade constraint on session
+    },
+    //DB TODO: in the event of user deleting their account, when retrieving that user's messages display user as 'Deleted user'
+
+    //INSERT INTO users(username,password,email,creation_date) VALUES ('test','pass','test@mail.com',NOW());
+    //INSERT INTO sessions(usr_id,session_str) VALUES (1,'aaaabbbb');
     register: function(req,res) {
         var verifyResult;
 
@@ -19,7 +23,7 @@ module.exports = {
             return;
         }
 
-        verifyResult = verifyString(req.username,{checkReservedNameList: true});
+        verifyResult = verifyString(req.username,{checkReservedNameList: true, maxLength: 128});
         if (verifyResult != '') {
             res.json({error:verifyResult});
             return;
