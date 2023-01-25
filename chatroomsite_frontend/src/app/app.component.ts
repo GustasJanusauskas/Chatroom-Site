@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { HelperFunctionsService } from "./services/helper-functions.service";
 
 @Component({
   selector: 'app-root',
@@ -7,4 +8,8 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'chatroomsite_frontend';
+
+  //For navbar
+  getCookie = HelperFunctionsService.getCookie;
+  deleteCookie = HelperFunctionsService.deleteCookie;
 }
