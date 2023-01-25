@@ -13,13 +13,14 @@ CREATE TABLE users(
 );
 
 CREATE TABLE sessions(
-	usr_id bigint REFERENCES users(usr_id) ON DELETE CASCADE UNIQUE NOT NULL,
-	session_str varchar(64) UNIQUE
+	usr_id bigint UNIQUE NOT NULL,
+	session_str varchar(128) UNIQUE,
+	FOREIGN KEY (usr_id) REFERENCES users(usr_id) ON DELETE CASCADE
 );
 
 CREATE TABLE rooms(
 	room_id bigserial UNIQUE NOT NULL,
-	name varchar(128) NOT NULL,
+	room_name varchar(128) UNIQUE NOT NULL,
 	creation_date timestamptz,
 	PRIMARY KEY(room_id)
 );
@@ -27,8 +28,9 @@ CREATE TABLE rooms(
 CREATE TABLE messages(
 	msg_id bigserial UNIQUE NOT NULL,
 	author_id bigint NOT NULL,
-	room_id bigint REFERENCES rooms(room_id) ON DELETE CASCADE NOT NULL,
+	room_id bigint NOT NULL,
 	msg varchar(512) NOT NULL,
 	creation_date timestamptz,
-	PRIMARY KEY(msg_id)
+	PRIMARY KEY(msg_id),
+	FOREIGN KEY (room_id) REFERENCES rooms(room_id) ON DELETE CASCADE
 );

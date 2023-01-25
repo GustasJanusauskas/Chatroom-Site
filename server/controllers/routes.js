@@ -1,35 +1,30 @@
 'use strict';
 
-const express = require("express");
 const path = require('path');
 const crypto = require('crypto');
-const { appendFile } = require("fs");
 
 module.exports = {
     getroot: function (req,res) {
         res.sendFile(path.join(__dirname,'..',String.raw`chatroomsite_frontend\dist\chatroomsite_frontend\index.html`));
     },
     //DB TODO: in the event of user deleting their account, when retrieving that user's messages display user as 'Deleted user'
-
-    //INSERT INTO users(username,password,email,creation_date) VALUES ('test','pass','test@mail.com',NOW());
-    //INSERT INTO sessions(usr_id,session_str) VALUES (1,'aaaabbbb');
     register: function(req,res) {
         var verifyResult;
 
         //Verify data
-        verifyResult = verifyString(req.email,{mustBeEmail: true});
+        verifyResult = verifyString(req.body.email,{mustBeEmail: true});
         if (verifyResult != '') {
             res.json({error:verifyResult});
             return;
         }
 
-        verifyResult = verifyString(req.username,{checkReservedNameList: true, maxLength: 128});
+        verifyResult = verifyString(req.body.username,{checkReservedNameList: true, maxLength: 128});
         if (verifyResult != '') {
             res.json({error:verifyResult});
             return;
         }
 
-        verifyResult = verifyString(req.password);
+        verifyResult = verifyString(req.body.password);
         if (verifyResult != '') {
             res.json({error:verifyResult});
             return;
@@ -38,15 +33,15 @@ module.exports = {
         //Generate password hash
         var salt = RandomString(16);
         var pepper = RandomString(16);
-        var finalPass = crypto.createHash('BLAKE2b512').update(salt + req.password + pepper).digest('hex');
+        var finalPass = crypto.createHash('BLAKE2b512').update(salt + req.body.password + pepper).digest('hex');
         
         //Create user row
         var db = req.app.get('db');
-        var query = 'INSERT INTO users(username,password,email,created,salt,pepper) VALUES($1,$2,$3,NOW(),$4,$5) RETURNING usr_id, username;';
-        var data = [req.username,finalPass,req.email,salt,pepper];
-      
+        var query = 'INSERT INTO users(username,password,email,creation_date,salt,pepper) VALUES($1,$2,$3,NOW(),$4,$5) RETURNING usr_id;';
+        var data = [req.body.username,finalPass,req.body.email,salt,pepper];
+    
         var DBErr = false;
-        db.query(query,data, (err, res) => {
+        db.query(query,data, (err, dbres) => {
           if (err) {
               res.json({error:'An account already exists with that username/email.'});
               console.log('DB ERROR RegUser: \n' + err);
@@ -54,10 +49,10 @@ module.exports = {
           }
       
           //Create session for user, session string empty until login
-          var innerData = [res.rows[0].usr_id];
-          var innerQuery = 'INSERT INTO sessions(usr_id,sessionID) VALUES($1,NULL);';
+          var innerData = [dbres.rows[0].usr_id];
+          var innerQuery = 'INSERT INTO sessions(usr_id,session_str) VALUES($1,NULL);';
       
-          db.query(innerQuery,innerData, (err, res) => {
+          db.query(innerQuery,innerData, (err, dbres) => {
             if (err) {
                 console.log("DB ERROR RegSession: \n" + err);
                 DBErr = true;
@@ -73,9 +68,63 @@ module.exports = {
           }
           else res.json({error:''});
         });
-    }, //TODO: finish login
+    },
     login: function(req,res) {
+        var verifyResult;
 
+        //Verify data
+        verifyResult = verifyString(req.body.username,{checkReservedNameList: true, maxLength: 128});
+        if (verifyResult != '') {
+            res.json({error:verifyResult});
+            return;
+        }
+
+        verifyResult = verifyString(req.body.password);
+        if (verifyResult != '') {
+            res.json({error:verifyResult});
+            return;
+        }
+
+        var db = req.app.get('db');
+        var query = 'SELECT * FROM users WHERE username = $1';
+        var data = [req.body.username];
+      
+        db.query(query,data, (err, dbres) => {
+            if (err || dbres.rows.length === 0) {
+                if (err) console.log("DB ERROR Login: \n" + err);
+
+                res.json({error:'No account with that username exists.'});
+                return;
+            }
+      
+            //Hash password
+            var salt = dbres.rows[0].salt;
+            var pepper = dbres.rows[0].pepper;
+            var finalPass = crypto.createHash('BLAKE2b512').update(salt + req.body.password + pepper).digest('hex');
+
+            //Check if password matches DB..
+            if (finalPass === dbres.rows[0].password) {
+                //Generate and update session string
+                var session = RandomString(128);
+                var innerData = [session,dbres.rows[0].usr_id];
+                var innerQuery = 'UPDATE sessions SET session_str = $1 WHERE usr_id = $2;';
+
+                db.query(innerQuery,innerData, (err, dbres) => {
+                    if (err) {
+                        console.log("DB ERROR UpdateSession: \n" + err);
+                        res.json({error:'Database error, please try again.'});
+                        return;
+                    }
+
+                    //Succesful login
+                    console.log("User " + req.body.username + " started new session.");
+                    res.json({session:session});
+                });
+            }
+            else {
+                res.json({error:'Incorrect password.'});
+            }
+        });
     }
 };
 

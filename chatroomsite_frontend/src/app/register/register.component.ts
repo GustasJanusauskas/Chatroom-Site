@@ -36,7 +36,10 @@ export class RegisterComponent implements OnInit {
     if (this.username.invalid || this.password.invalid || this.email.invalid) return;
 
     this.userdataservice.registerUser(this.username.value!,this.password.value!,this.email.value!).subscribe( data => {
-      if (data.error) return;
+      if (data.error) {
+        this.snackBar.open(data.error,'OK');
+        return;
+      }
 
       //on success
       this.email.markAsUntouched();

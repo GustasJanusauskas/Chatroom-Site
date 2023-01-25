@@ -9,7 +9,6 @@
 
 .RoomSearchBar, .ChatInput {
     width: 100%;
-    height: 3rem;
 }
 
 .RoomList, .ChatViewport {

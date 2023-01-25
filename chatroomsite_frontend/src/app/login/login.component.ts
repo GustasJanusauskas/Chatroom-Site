@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { FormControl, Validators } from "@angular/forms";
-import {Router} from "@angular/router"
-import {MatSnackBar} from '@angular/material/snack-bar';
+import { Router } from "@angular/router"
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { UserdataService } from "../services/userdata.service";
 import { HelperFunctionsService } from "../services/helper-functions.service";
@@ -21,7 +21,7 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
-
+    
   }
 
   getErrorMsg(form: FormControl): string {
@@ -32,11 +32,15 @@ export class LoginComponent implements OnInit {
     return '';
   }
 
-  login(): void {
+  login(): void { 
     if (this.username.invalid || this.password.invalid) return;
 
     this.userdataservice.loginUser(this.username.value!,this.password.value!).subscribe( data => {
-      if (data.error) return;
+      console.log(data);
+      if (data.error) {
+        this.snackBar.open(data.error,'OK');
+        return;
+      }
 
       HelperFunctionsService.setCookie('session',data.session);
 
