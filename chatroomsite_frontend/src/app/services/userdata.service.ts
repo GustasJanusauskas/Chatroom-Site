@@ -24,4 +24,19 @@ export class UserdataService {
     var data = {username: user, password: pass, email: email};
     return this.http.post<any>('/register',data,httpOptions);
   }
+
+  searchRooms(roomName: string): Observable<any> {
+    var data = {name:roomName};
+    return this.http.post<any>('/searchrooms',data,httpOptions);
+  }
+
+  getRoomInfo(roomID: number): Observable<any> {
+    var data = {id:roomID};
+    return this.http.post<any>('/getroominfo',data,httpOptions);
+  }
+
+  createRoom(session: string, roomName: string): Observable<any> {
+    var data = {session,name:roomName};
+    return this.http.post<any>('/createroom',data,httpOptions);
+  }
 }

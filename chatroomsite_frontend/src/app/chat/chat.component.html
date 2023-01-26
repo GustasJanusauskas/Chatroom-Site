@@ -4,16 +4,39 @@
             <div class="RoomBar col me-3">
                 <h1>Rooms</h1>
                 <mat-form-field class="RoomSearchBar">
-                    <mat-label>Search rooms</mat-label>
-                    <input matInput placeholder="Please enter room name.">
+                    <mat-label>Search rooms..</mat-label>
+                    <input matInput maxlength="128" placeholder="Please enter room name." [(ngModel)]="searchInput" (ngModelChange)="searchUpdate()">
+                    <mat-hint align="end">{{searchInput.length || 0}}/128</mat-hint>
                 </mat-form-field>
                 <div class="RoomList">
+                    <mat-card class="RoomCard mt-2" *ngIf="showCreateNewRoomCard && searchInput.length > 2">
+                        <mat-card-header>
+                            <mat-card-title>Create new room titled "{{searchInput}}"</mat-card-title>
+                        </mat-card-header>
+                        <mat-card-actions>
+                            <button mat-button color="primary" (click)="createRoom()">
+                                <mat-icon style="vertical-align:text-bottom;">add_box</mat-icon>
+                                &ThickSpace;&ThickSpace;Create
+                            </button>
+                        </mat-card-actions>
+                    </mat-card>
+
                     <mat-card class="RoomCard mt-2" *ngFor="let room of rooms">
                         <mat-card-header>
                             <img mat-card-avatar [src]="room.imagePath || 'assets/defaultProfile.png'" />
                             <mat-card-title>{{room.name}}</mat-card-title>
-                            <mat-card-subtitle>{{room.name}}</mat-card-subtitle>
+                            <mat-card-subtitle>Created by {{room.author || 'System'}}</mat-card-subtitle>
                         </mat-card-header>
+                        <mat-card-actions>
+                            <button mat-button color="accent" (click)="selectRoom(room)">
+                                <mat-icon style="vertical-align:text-bottom;">open_in_browser</mat-icon>
+                                &ThickSpace;&ThickSpace;Open
+                            </button>
+                            <button mat-button color="primary">
+                                <mat-icon style="vertical-align:text-bottom;">star</mat-icon>
+                                &ThickSpace;&ThickSpace;Save
+                            </button>
+                        </mat-card-actions>
                     </mat-card>
                 </div>
             </div>
@@ -30,15 +53,18 @@
                             <mat-card-subtitle>Sent {{message.date}}</mat-card-subtitle>
                         </mat-card-content>
                         <mat-card-actions>
-                            <button mat-button color="accent"><mat-icon style="vertical-align:text-bottom;">reply</mat-icon>&ThickSpace;&ThickSpace;Reply</button>
+                            <button mat-button color="accent" (click)="reply(message.author)"><mat-icon style="vertical-align:text-bottom;">reply</mat-icon>&ThickSpace;&ThickSpace;Reply</button>
                         </mat-card-actions>
                     </mat-card>
                 </div>
                 <mat-form-field class="ChatInput mt-2">
-                    <mat-label>Send message</mat-label>
-                    <input matInput placeholder="Please enter your message.">
+                    <mat-label>Enter message..</mat-label>
+                    <input matInput maxlength="512" placeholder="Please enter your message." [(ngModel)]="messageInput">
+                    <mat-hint align="end">{{messageInput.length || 0}}/512</mat-hint>
                 </mat-form-field>
-                <button mat-button color="primary" class="ChatInput mt-2"><mat-icon>send</mat-icon>&ThickSpace; Send message</button>
+                <button mat-button color="primary" class="ChatInput mt-2" [disabled]="!getCookie('session')">
+                    <mat-icon>send</mat-icon>
+                    &ThickSpace; {{getCookie('session') ? 'Send message' : 'Please log in to send a message.'}}</button>
             </div>
         </div>
     </div>

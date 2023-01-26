@@ -7,7 +7,102 @@ module.exports = {
     getroot: function (req,res) {
         res.sendFile(path.join(__dirname,'..',String.raw`chatroomsite_frontend\dist\chatroomsite_frontend\index.html`));
     },
-    //DB TODO: in the event of user deleting their account, when retrieving that user's messages display user as 'Deleted user'
+    searchRooms: function(req,res) {
+        var verifyResult;
+
+        //Verify data
+        verifyResult = verifyString(req.body.name,{minLength: 3, maxLength: 128});
+        if (verifyResult != '') {
+            res.json({error:verifyResult});
+            return;
+        }
+
+        //Prepare search term
+        var search = req.body.name.replace('%','');
+        search += '%';
+
+        var db = req.app.get('db');
+        var query = 'SELECT room_id, room_name, users.username FROM rooms, users WHERE rooms.room_name LIKE $1 AND rooms.author_id = users.usr_id LIMIT 30;';
+        var data = [search];
+      
+        db.query(query,data, (err, dbres) => {
+            if (err) {
+                console.log("DB ERROR SearchRooms: \n" + err);
+                res.json({error:'Database error, please try again.'});
+                return;
+            }
+
+            const result = [];
+            for (let index = 0; index < dbres.rows.length; index++) {
+                result.push({
+                    id:dbres.rows[index].room_id,
+                    name: dbres.rows[index].room_name,
+                    author: dbres.rows[index].username,
+                });
+            }
+
+            res.json(result);
+        });
+    },
+    getRoomInfo: function(req,res) {
+        var db = req.app.get('db');
+        var query = 'SELECT msg_id, username, msg, messages.creation_date FROM messages, users WHERE room_id = $1 AND users.usr_id = messages.author_id ORDER BY creation_date;';
+        var data = [req.body.id];
+
+        db.query(query,data, (err, dbres) => {
+            if (err) {
+                console.log("DB ERROR SearchRooms: \n" + err);
+                res.json({error:'Database error, please try again.'});
+                return;
+            }
+
+            const result = [];
+            for (let index = 0; index < dbres.rows.length; index++) {
+                result.push({
+                    id:dbres.rows[index].msg_id,
+                    author: dbres.rows[index].username,
+                    body: dbres.rows[index].msg,
+                    date: dbres.rows[index].creation_date
+                });
+            }
+
+            res.json(result);
+        });
+    },
+    createRoom: function(req,res) {
+        var verifyResult;
+
+        //Verify data
+        verifyResult = verifyString(req.body.name,{minLength: 3, maxLength: 128, checkReservedNameList:true});
+        if (verifyResult != '') {
+            res.json({error:verifyResult});
+            return;
+        }
+
+        getUserInfo(req, user => {
+            if (!user) {
+                res.json({error:'User not found, try logging in again.'});
+                return;
+            }
+
+            //Create user row
+            var db = req.app.get('db');
+            var query = 'INSERT INTO rooms(room_name,author_id) VALUES($1,$2) RETURNING room_id;';
+            var data = [req.body.name,user.id];
+        
+            db.query(query,data, (err, dbres) => {
+                if (err) {
+                    res.json({error:'A room already exists with that name.'});
+                    console.log('DB ERROR CreateRoom: \n' + err);
+                    return;
+                }
+
+                res.json({
+                    id:dbres.rows[0].room_id
+                });
+            });
+        });
+    },
     register: function(req,res) {
         var verifyResult;
 
@@ -128,12 +223,34 @@ module.exports = {
     }
 };
 
+function getUserInfo(req,callback) {
+    var db = req.app.get('db');
+    var query = 'SELECT users.usr_id, username, email, creation_date FROM sessions, users WHERE session_str = $1 AND sessions.usr_id = users.usr_id';
+    var data = [req.body.session];
+  
+    db.query(query,data, (err, dbres) => {
+        if (err || dbres.rows.length === 0) {
+            if (err) console.log("DB ERROR GetUserInfo: \n" + err);
+            callback();
+            return;
+        }
+
+        callback({
+            id: dbres.rows[0].usr_id,
+            username: dbres.rows[0].username,
+            email: dbres.rows[0].email,
+            creation_date: dbres.rows[0].creation_date
+        });
+        return;
+    });
+}
+
 const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 function verifyString(input,options = {mustBeEmail: false,checkReservedNameList: false,minLength: 8, maxLength: 256}) {
     if (input.length < options.minLength) return `Input too short. Must be atleast ${minLength} characters long.`;
     if (input.length > options.maxLength) return `Input too long. Must be atleast ${maxLength} characters long.`;
-    if (options.mustBeEmail && !emailRegex.test(input)) return `Must be a valid email adress.`;
-    if (options.checkReservedNameList && ['server','host','owner','system'].indexOf(input.toLowerCase()) != -1) return `Username cannot be in the reserved word list. Try another username.`;
+    if (options.mustBeEmail && !emailRegex.test(input)) return `Input must be a valid email adress.`;
+    if (options.checkReservedNameList && ['general','main','server','host','owner','system'].indexOf(input.toLowerCase()) != -1) return `Input cannot be in the reserved word list. Try another name.`;
 
     return ``;
 }

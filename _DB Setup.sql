@@ -6,7 +6,7 @@ CREATE TABLE users(
 	username varchar(128) UNIQUE NOT NULL,
 	password varchar(256) NOT NULL,
 	email varchar(256) UNIQUE NOT NULL,
-	creation_date timestamptz,
+	creation_date timestamptz DEFAULT NOW(),
 	salt varchar(16),
 	pepper varchar(16),
 	PRIMARY KEY(usr_id)
@@ -21,7 +21,8 @@ CREATE TABLE sessions(
 CREATE TABLE rooms(
 	room_id bigserial UNIQUE NOT NULL,
 	room_name varchar(128) UNIQUE NOT NULL,
-	creation_date timestamptz,
+	author_id bigint NOT NULL,
+	creation_date timestamptz DEFAULT NOW(),
 	PRIMARY KEY(room_id)
 );
 
@@ -30,7 +31,7 @@ CREATE TABLE messages(
 	author_id bigint NOT NULL,
 	room_id bigint NOT NULL,
 	msg varchar(512) NOT NULL,
-	creation_date timestamptz,
+	creation_date timestamptz DEFAULT NOW(),
 	PRIMARY KEY(msg_id),
 	FOREIGN KEY (room_id) REFERENCES rooms(room_id) ON DELETE CASCADE
 );

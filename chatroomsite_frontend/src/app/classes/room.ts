@@ -1,8 +1,12 @@
 export class Room {
-    name: string = "";
-    imagePath: string = "";
+    id: number = -1;
 
-    constructor(n:string = "") {
+    name: string = '';
+    author?: string = '';
+    imagePath?: string = '';
+
+    constructor(n:string = '', i: number = -1) {
         this.name = n;
+        this.id = i;
     }
 }

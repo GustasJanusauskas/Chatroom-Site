@@ -31,6 +31,9 @@ app.use(express.static(path.join(__dirname,'..',String.raw`chatroomsite_frontend
 app.get('/', routes.getroot);
 app.post('/register',routes.register);
 app.post('/login',routes.login);
+app.post('/searchrooms',routes.searchRooms);
+app.post('/getroominfo',routes.getRoomInfo);
+app.post('/createroom',routes.createRoom);
 
 app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
