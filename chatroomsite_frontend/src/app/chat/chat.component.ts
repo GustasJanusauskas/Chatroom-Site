@@ -6,6 +6,7 @@ import { Message } from '../classes/message';
 
 import { HelperFunctionsService } from "../services/helper-functions.service";
 import { UserdataService } from "../services/userdata.service";
+import { MessagingService } from "../services/messaging.service";
 
 @Component({
   selector: 'app-chat',
@@ -13,7 +14,7 @@ import { UserdataService } from "../services/userdata.service";
   styleUrls: ['./chat.component.css']
 })
 export class ChatComponent implements OnInit {
-  currentRoom: Room = new Room('testRoom');
+  currentRoom: Room = new Room('Loading..');
   rooms: Room[] = [];
   messages: Message[] = [];
 
@@ -26,7 +27,7 @@ export class ChatComponent implements OnInit {
   getCookie = HelperFunctionsService.getCookie;
   deleteCookie = HelperFunctionsService.deleteCookie;
 
-  constructor(private userdataService: UserdataService, private snackbar: MatSnackBar) { 
+  constructor(private userdataService: UserdataService, private messagingService: MessagingService, private snackbar: MatSnackBar) { 
     //Setup search input checking
     setInterval(() => {
       if (this.lastSearchCharacterInput + 250 < Date.now() && this.searchInput.length > 2) {
@@ -41,19 +42,31 @@ export class ChatComponent implements OnInit {
         this.lastSearchCharacterInput = Number.NaN;
       }
     },125);
+
+    //Setup websocket message handler
+    messagingService.messages.subscribe( (msg: Message) => {
+      this.messages.push(msg);
+    });
   }
 
   ngOnInit(): void {
-    this.rooms.find( (value) => {
-      return value.name === this.searchInput;
-    });
-    //debug
-    for (let index = 0; index < 10; index++) {
-      this.rooms.push({name:'testRoom' + index,id:index});
-      this.messages.push({author:'testAuthor',body:'testMessage' + index,date:new Date(), id:index});
-    }
+    //Must wait for websock service to initialise
+    setTimeout(() => {
+      //Connect to default general room, must set ID correctly here!
+      this.selectRoom(new Room('general',5));
+    },250);
   }
 
+  //MESSAGING//
+  sendMessage(): void {
+    //Send session and message body, room and sending date get added serverside
+    var msg = {type:'message',session:HelperFunctionsService.getCookie('session'),body:this.messageInput};
+
+    this.messagingService.messages.next(msg);
+    this.messageInput = '';
+  }
+
+  //ROOMS//
   createRoom(): void {
     this.userdataService.createRoom(HelperFunctionsService.getCookie('session') || '',this.searchInput).subscribe( data => {
       if (data.error) {
@@ -71,11 +84,20 @@ export class ChatComponent implements OnInit {
 
   selectRoom(room: Room): void {
     this.currentRoom = room;
+
+    //Get messages for new room
     this.userdataService.getRoomInfo(room.id).subscribe( data => {
       this.messages = data;
     });
+
+    //Update serverside current room info
+    var msg = {type:'roomswitch',room:room.id};
+
+    this.messagingService.messages.next(msg);
   }
 
+
+  //MISC//
   searchUpdate(): void {
     this.lastSearchCharacterInput = Date.now();
   }

@@ -62,7 +62,7 @@
                     <input matInput maxlength="512" placeholder="Please enter your message." [(ngModel)]="messageInput">
                     <mat-hint align="end">{{messageInput.length || 0}}/512</mat-hint>
                 </mat-form-field>
-                <button mat-button color="primary" class="ChatInput mt-2" [disabled]="!getCookie('session')">
+                <button mat-button color="primary" class="ChatInput mt-2" [disabled]="!getCookie('session')" (click)="sendMessage()">
                     <mat-icon>send</mat-icon>
                     &ThickSpace; {{getCookie('session') ? 'Send message' : 'Please log in to send a message.'}}</button>
             </div>

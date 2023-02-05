@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
+
 import { HelperFunctionsService } from "./services/helper-functions.service";
+import { MessagingService } from "./services/messaging.service";
 
 @Component({
   selector: 'app-root',
@@ -12,4 +14,15 @@ export class AppComponent {
   //For navbar
   getCookie = HelperFunctionsService.getCookie;
   deleteCookie = HelperFunctionsService.deleteCookie;
+
+  constructor(private messagingService: MessagingService) {
+
+  }
+
+  logout(): void {
+    var request = {type: 'disconnect', session:HelperFunctionsService.getCookie('session')};
+    this.messagingService.messages.next(request);
+
+    HelperFunctionsService.deleteCookie('session');
+  }
 }

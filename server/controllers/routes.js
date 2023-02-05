@@ -1,5 +1,7 @@
 'use strict';
 
+const helpers = require('./helperfunctions');
+
 const path = require('path');
 const crypto = require('crypto');
 
@@ -11,7 +13,7 @@ module.exports = {
         var verifyResult;
 
         //Verify data
-        verifyResult = verifyString(req.body.name,{minLength: 3, maxLength: 128});
+        verifyResult = helpers.verifyString(req.body.name,{minLength: 3, maxLength: 128});
         if (verifyResult != '') {
             res.json({error:verifyResult});
             return;
@@ -73,13 +75,13 @@ module.exports = {
         var verifyResult;
 
         //Verify data
-        verifyResult = verifyString(req.body.name,{minLength: 3, maxLength: 128, checkReservedNameList:true});
+        verifyResult = helpers.verifyString(req.body.name,{minLength: 3, maxLength: 128, checkReservedNameList:true});
         if (verifyResult != '') {
             res.json({error:verifyResult});
             return;
         }
 
-        getUserInfo(req, user => {
+        helpers.getUserInfo(req.app,req.body.session, user => {
             if (!user) {
                 res.json({error:'User not found, try logging in again.'});
                 return;
@@ -107,32 +109,32 @@ module.exports = {
         var verifyResult;
 
         //Verify data
-        verifyResult = verifyString(req.body.email,{mustBeEmail: true});
+        verifyResult = helpers.verifyString(req.body.email,{mustBeEmail: true});
         if (verifyResult != '') {
             res.json({error:verifyResult});
             return;
         }
 
-        verifyResult = verifyString(req.body.username,{checkReservedNameList: true, maxLength: 128});
+        verifyResult = helpers.verifyString(req.body.username,{checkReservedNameList: true, maxLength: 128});
         if (verifyResult != '') {
             res.json({error:verifyResult});
             return;
         }
 
-        verifyResult = verifyString(req.body.password);
+        verifyResult = helpers.verifyString(req.body.password);
         if (verifyResult != '') {
             res.json({error:verifyResult});
             return;
         }
 
         //Generate password hash
-        var salt = RandomString(16);
-        var pepper = RandomString(16);
+        var salt = helpers.RandomString(16);
+        var pepper = helpers.RandomString(16);
         var finalPass = crypto.createHash('BLAKE2b512').update(salt + req.body.password + pepper).digest('hex');
         
         //Create user row
         var db = req.app.get('db');
-        var query = 'INSERT INTO users(username,password,email,creation_date,salt,pepper) VALUES($1,$2,$3,NOW(),$4,$5) RETURNING usr_id;';
+        var query = 'INSERT INTO users(username,password,email,salt,pepper) VALUES($1,$2,$3,$4,$5) RETURNING usr_id;';
         var data = [req.body.username,finalPass,req.body.email,salt,pepper];
     
         var DBErr = false;
@@ -168,13 +170,13 @@ module.exports = {
         var verifyResult;
 
         //Verify data
-        verifyResult = verifyString(req.body.username,{checkReservedNameList: true, maxLength: 128});
+        verifyResult = helpers.verifyString(req.body.username,{checkReservedNameList: true, maxLength: 128});
         if (verifyResult != '') {
             res.json({error:verifyResult});
             return;
         }
 
-        verifyResult = verifyString(req.body.password);
+        verifyResult = helpers.verifyString(req.body.password);
         if (verifyResult != '') {
             res.json({error:verifyResult});
             return;
@@ -200,7 +202,7 @@ module.exports = {
             //Check if password matches DB..
             if (finalPass === dbres.rows[0].password) {
                 //Generate and update session string
-                var session = RandomString(128);
+                var session = helpers.RandomString(128);
                 var innerData = [session,dbres.rows[0].usr_id];
                 var innerQuery = 'UPDATE sessions SET session_str = $1 WHERE usr_id = $2;';
 
@@ -222,44 +224,3 @@ module.exports = {
         });
     }
 };
-
-function getUserInfo(req,callback) {
-    var db = req.app.get('db');
-    var query = 'SELECT users.usr_id, username, email, creation_date FROM sessions, users WHERE session_str = $1 AND sessions.usr_id = users.usr_id';
-    var data = [req.body.session];
-  
-    db.query(query,data, (err, dbres) => {
-        if (err || dbres.rows.length === 0) {
-            if (err) console.log("DB ERROR GetUserInfo: \n" + err);
-            callback();
-            return;
-        }
-
-        callback({
-            id: dbres.rows[0].usr_id,
-            username: dbres.rows[0].username,
-            email: dbres.rows[0].email,
-            creation_date: dbres.rows[0].creation_date
-        });
-        return;
-    });
-}
-
-const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-function verifyString(input,options = {mustBeEmail: false,checkReservedNameList: false,minLength: 8, maxLength: 256}) {
-    if (input.length < options.minLength) return `Input too short. Must be atleast ${minLength} characters long.`;
-    if (input.length > options.maxLength) return `Input too long. Must be atleast ${maxLength} characters long.`;
-    if (options.mustBeEmail && !emailRegex.test(input)) return `Input must be a valid email adress.`;
-    if (options.checkReservedNameList && ['general','main','server','host','owner','system'].indexOf(input.toLowerCase()) != -1) return `Input cannot be in the reserved word list. Try another name.`;
-
-    return ``;
-}
-
-function RandomString(length) {
-    var pool = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    var result = "";
-    for (var x = 0; x < length;x++) {
-      result += pool.charAt(Math.random() * pool.length - 1);
-    }
-    return result;
-  }

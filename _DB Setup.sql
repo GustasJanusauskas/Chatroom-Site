@@ -35,3 +35,16 @@ CREATE TABLE messages(
 	PRIMARY KEY(msg_id),
 	FOREIGN KEY (room_id) REFERENCES rooms(room_id) ON DELETE CASCADE
 );
+
+WITH adminid AS (
+	INSERT INTO users(username,password,email,salt,pepper)
+	VALUES('System','unused','System@chatroom.com','unused','unused')
+	RETURNING usr_id
+),
+roomid AS (
+	INSERT INTO rooms(room_name,author_id)
+	VALUES ('general', (SELECT usr_id FROM adminid) )
+	RETURNING room_id
+)
+INSERT INTO sessions(usr_id,session_str)
+VALUES( (SELECT usr_id FROM adminid) ,NULL);
