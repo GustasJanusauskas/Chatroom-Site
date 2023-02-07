@@ -71,8 +71,11 @@ export class ChatComponent implements OnInit {
     msg.displaydate = new Date(msg.date).toLocaleString();
     //Trim message if long, set flag for show more button
     if (msg.body.length > 128 || (msg.body.match(/\n/g) || []).length >= 4) {
-      msg.displaybody = msg.body.substring(0,128).replaceAll('\n','');
+      msg.displaybody = msg.body.substring(0,128).replaceAll('\n','') + '...';
       msg.displaymorebtn = true;
+    }
+    else {
+      msg.displaybody = msg.body;
     }
 
     return msg;
