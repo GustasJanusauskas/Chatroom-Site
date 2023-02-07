@@ -1,3 +1,5 @@
+import { SafeUrl } from "@angular/platform-browser";
+
 export class Message {
     id: number = -1;
 
@@ -7,5 +9,6 @@ export class Message {
 
     displaybody: string = '';
     displaydate: string = '';
+    displayembedlink: SafeUrl = '';
     displaymorebtn: boolean = false;
 }

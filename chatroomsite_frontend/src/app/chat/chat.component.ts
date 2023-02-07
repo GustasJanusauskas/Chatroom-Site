@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { MatSnackBar } from "@angular/material/snack-bar";
 
 import { Room } from '../classes/room';
@@ -27,7 +28,7 @@ export class ChatComponent implements OnInit {
   getCookie = HelperFunctionsService.getCookie;
   deleteCookie = HelperFunctionsService.deleteCookie;
 
-  constructor(private userdataService: UserdataService, private messagingService: MessagingService, private snackbar: MatSnackBar) { 
+  constructor(private userdataService: UserdataService, private messagingService: MessagingService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer) { 
     //Setup search input checking
     setInterval(() => {
       if (this.lastSearchCharacterInput + 250 < Date.now() && this.searchInput.length > 2) {
@@ -69,6 +70,11 @@ export class ChatComponent implements OnInit {
   processMessage(msg: Message): Message {
     //Format date
     msg.displaydate = new Date(msg.date).toLocaleString();
+
+    //Detect and embed yt videos
+    var ytmatch = /(?:https?:\/\/)?(?:www\.)?youtu\.?be(?:\.com)?\/?.*(?:watch|embed)?(?:.*v=|v\/|\/)([\w\-_]+)\&?/g.exec(msg.body);
+    if (ytmatch) msg.displayembedlink = this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube.com/embed/${ytmatch[1]}`);
+
     //Trim message if long, set flag for show more button
     if (msg.body.length > 128 || (msg.body.match(/\n/g) || []).length >= 4) {
       msg.displaybody = msg.body.substring(0,128).replaceAll('\n','') + '...';

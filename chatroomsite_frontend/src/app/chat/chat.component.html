@@ -51,6 +51,8 @@
                         <mat-card-content>
                             <p class="ChatMessageBody">{{message.displaybody}}</p>
                             <a class="ChatMessageLink" (click)="showFullMessage(message)" *ngIf="message.displaymorebtn">Read full message..</a>
+                            <iframe width="560" height="315" [src]="message.displayembedlink" *ngIf="message.displayembedlink" frameborder="0" allowfullscreen></iframe>
+
                             <mat-card-subtitle>Sent {{message.displaydate}}</mat-card-subtitle>
                         </mat-card-content>
                         <mat-card-actions>
