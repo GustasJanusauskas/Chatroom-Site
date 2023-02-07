@@ -23,3 +23,16 @@
     max-height: 42rem;
     height: calc(100% - 10rem - 0.5rem);
 }
+
+.ChatMessageBody {
+    white-space: pre-wrap;
+}
+
+.ChatMessageLink {
+    color: var(--link-colour);
+    text-decoration: none;
+}
+
+.ChatMessageLink:hover {
+    cursor: pointer;
+}

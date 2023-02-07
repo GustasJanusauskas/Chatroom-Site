@@ -45,7 +45,7 @@ export class ChatComponent implements OnInit {
 
     //Setup websocket message handler
     messagingService.messages.subscribe( (msg: Message) => {
-      this.messages.push(msg);
+      this.messages.push(this.processMessage(msg));
     });
   }
 
@@ -64,6 +64,18 @@ export class ChatComponent implements OnInit {
 
     this.messagingService.messages.next(msg);
     this.messageInput = '';
+  }
+
+  processMessage(msg: Message): Message {
+    //Format date
+    msg.displaydate = new Date(msg.date).toLocaleString();
+    //Trim message if long, set flag for show more button
+    if (msg.body.length > 128 || (msg.body.match(/\n/g) || []).length >= 4) {
+      msg.displaybody = msg.body.substring(0,128).replaceAll('\n','');
+      msg.displaymorebtn = true;
+    }
+
+    return msg;
   }
 
   //ROOMS//
@@ -87,6 +99,11 @@ export class ChatComponent implements OnInit {
 
     //Get messages for new room
     this.userdataService.getRoomInfo(room.id).subscribe( data => {
+      //Format dates
+      data.forEach((msg: Message) => {
+        msg = this.processMessage(msg); //TODO test this, may need a for loop instead
+      });
+
       this.messages = data;
     });
 
@@ -104,5 +121,10 @@ export class ChatComponent implements OnInit {
 
   reply(username: string): void {
     this.messageInput += `@${username}`;
+  }
+
+  showFullMessage(msg: Message): void {
+    msg.displaybody = msg.body;
+    msg.displaymorebtn = false;
   }
 }

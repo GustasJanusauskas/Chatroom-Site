@@ -3,6 +3,9 @@ export class Message {
 
     author: string = '';
     body: string = '';
-
     date: Date = Date.prototype;
+
+    displaybody: string = '';
+    displaydate: string = '';
+    displaymorebtn: boolean = false;
 }
