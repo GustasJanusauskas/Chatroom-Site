@@ -2,6 +2,8 @@
 
 const helpers = require('./helperfunctions');
 
+const sanitizeHtml = require('sanitize-html');
+
 //Extra debug info at runtime
 const VERBOSE_DEBUG = true;
 
@@ -35,14 +37,20 @@ module.exports = {
             helpers.getUserInfo(app,jsonMessage.session, senderinfo => {
               if (!senderinfo) return; //no user found/not logged in
 
+              //Sanitize message (remove HTML tags)
+              var sanitizedMessage = sanitizeHtml(jsonMessage.body, {
+                allowedTags: [],
+                allowedAttributes: {}
+              });
+
               //Save message to psql DB (message history)
-              saveMessage(app,jsonMessage.body,senderinfo.id,ws.room);
+              saveMessage(app,sanitizedMessage,senderinfo.id,ws.room);
 
               //Find other users in the same room as sender
               server.clients.forEach(user => {
                 if (user.room === ws.room) {
                   //user.socket.send(JSON.stringify({author:senderinfo.username,body:jsonMessage.body,date:new Date()}));
-                  user.send(JSON.stringify({author:senderinfo.username,body:jsonMessage.body,date:new Date()}));
+                  user.send(JSON.stringify({author:senderinfo.username,body:sanitizedMessage,date:new Date()}));
                 }
               });
             });

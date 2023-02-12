@@ -43,7 +43,9 @@ WITH adminid AS (
 ),
 roomid AS (
 	INSERT INTO rooms(room_name,author_id)
-	VALUES ('general', (SELECT usr_id FROM adminid) )
+	VALUES ('General', (SELECT usr_id FROM adminid) ),
+	('Feedback', (SELECT usr_id FROM adminid) ),
+	('Help', (SELECT usr_id FROM adminid) ),
 	RETURNING room_id
 )
 INSERT INTO sessions(usr_id,session_str)

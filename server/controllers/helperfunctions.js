@@ -28,7 +28,7 @@ module.exports = {
         if (input.length < options.minLength) return `Input too short. Must be atleast ${minLength} characters long.`;
         if (input.length > options.maxLength) return `Input too long. Must be atleast ${maxLength} characters long.`;
         if (options.mustBeEmail && !emailRegex.test(input)) return `Input must be a valid email adress.`;
-        if (options.checkReservedNameList && ['general','main','server','host','owner','system'].indexOf(input.toLowerCase()) != -1) return `Input cannot be in the reserved word list. Try another name.`;
+        if (options.checkReservedNameList && ['general','feedback','help','main','server','host','owner','system'].indexOf(input.toLowerCase()) != -1) return `Input cannot be in the reserved word list. Try another name.`;
 
         return ``;
     },

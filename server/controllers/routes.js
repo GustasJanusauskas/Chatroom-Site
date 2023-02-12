@@ -24,7 +24,7 @@ module.exports = {
         search += '%';
 
         var db = req.app.get('db');
-        var query = 'SELECT room_id, room_name, users.username FROM rooms, users WHERE rooms.room_name LIKE $1 AND rooms.author_id = users.usr_id LIMIT 30;';
+        var query = 'SELECT room_id, room_name, users.username FROM rooms, users WHERE LOWER(rooms.room_name) LIKE LOWER($1) AND rooms.author_id = users.usr_id LIMIT 30;';
         var data = [search];
       
         db.query(query,data, (err, dbres) => {
@@ -89,7 +89,7 @@ module.exports = {
 
             //Create user row
             var db = req.app.get('db');
-            var query = 'INSERT INTO rooms(room_name,author_id) VALUES($1,$2) RETURNING room_id;';
+            var query = 'INSERT INTO rooms(room_name,author_id) VALUES(INITCAP($1),$2) RETURNING room_id;';
             var data = [req.body.name,user.id];
         
             db.query(query,data, (err, dbres) => {

@@ -37,10 +37,18 @@ export class ChatComponent implements OnInit {
 
           //if exact searchInput is not returned (not present in db), show the 'create new room' card.
           this.showCreateNewRoomCard = !this.rooms.find( (value) => {
-            return value.name === this.searchInput;
+            return value.name.toLowerCase() === this.searchInput.toLowerCase();
           });
         });
         this.lastSearchCharacterInput = Number.NaN;
+      }
+      else if (this.searchInput.length === 0) {
+        //Default rooms, shown when search field is empty, IDs must be accurate!
+        this.rooms = [
+          new Room('General',1),
+          new Room('Feedback',2),
+          new Room('Help',3)
+        ];
       }
     },125);
 
@@ -54,7 +62,7 @@ export class ChatComponent implements OnInit {
     //Must wait for websock service to initialise
     setTimeout(() => {
       //Connect to default general room, must set ID correctly here!
-      this.selectRoom(new Room('general',5));
+      this.selectRoom(new Room('General',1));
     },250);
   }
 
@@ -74,6 +82,15 @@ export class ChatComponent implements OnInit {
     //Detect and embed yt videos
     var ytmatch = /(?:https?:\/\/)?(?:www\.)?youtu\.?be(?:\.com)?\/?.*(?:watch|embed)?(?:.*v=|v\/|\/)([\w\-_]+)\&?/g.exec(msg.body);
     if (ytmatch) msg.displayembedlink = this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube.com/embed/${ytmatch[1]}`);
+
+    //Detect and embed images
+    var imgmatch = /(https?:\/\/.*\.(?:png|jpg))/g.exec(msg.body);
+    if (imgmatch) msg.displayimglink = this.sanitizer.bypassSecurityTrustResourceUrl(imgmatch[1]);
+
+    //Detect links
+    msg.body = msg.body.replace(/(https?:\/\/[^\s]+)/g, function(url) {
+      return '<a href="' + url + '">' + url + '</a>';
+    });
 
     //Trim message if long, set flag for show more button
     if (msg.body.length > 128 || (msg.body.match(/\n/g) || []).length >= 4) {
@@ -110,7 +127,7 @@ export class ChatComponent implements OnInit {
     this.userdataService.getRoomInfo(room.id).subscribe( data => {
       //Format dates
       data.forEach((msg: Message) => {
-        msg = this.processMessage(msg); //TODO test this, may need a for loop instead
+        msg = this.processMessage(msg);
       });
 
       this.messages = data;
@@ -135,5 +152,11 @@ export class ChatComponent implements OnInit {
   showFullMessage(msg: Message): void {
     msg.displaybody = msg.body;
     msg.displaymorebtn = false;
+  }
+
+  initcap(input: string): string {
+    return input.toLowerCase().replace(/(?:^|\s)[a-z]/g, (m) => {
+      return m.toUpperCase();
+   });
   }
 }

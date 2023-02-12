@@ -36,3 +36,8 @@
 .ChatMessageLink:hover {
     cursor: pointer;
 }
+
+.ChatMessageImg {
+    max-width: 100%;
+    border-radius: 1rem;
+}

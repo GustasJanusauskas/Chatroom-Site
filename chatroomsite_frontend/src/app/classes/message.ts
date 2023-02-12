@@ -9,6 +9,9 @@ export class Message {
 
     displaybody: string = '';
     displaydate: string = '';
+
     displayembedlink: SafeUrl = '';
+    displayimglink: SafeUrl = '';
+    
     displaymorebtn: boolean = false;
 }
