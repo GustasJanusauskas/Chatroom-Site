@@ -1,6 +1,26 @@
 'use strict';
 
 module.exports = {
+    setUserArray: function(app,column,value,userID,add,callback) {
+        var db = app.get('db');
+        //Function formats SQL strings, must set column value on server to prevent SQL injection.
+        var query;
+        if (add) query = `UPDATE users SET ${column} = array_append(${column},$1) WHERE usr_id = $2`;
+        else query = `UPDATE users SET ${column} = array_remove(${column},$1) WHERE usr_id = $2`;
+
+        var data = [value,userID];
+      
+        db.query(query,data, (err, dbres) => {
+            if (err) {
+                console.log("DB ERROR SetUserArray: \n" + err);
+                callback();
+                return;
+            }
+
+            callback();
+            return;
+        });
+    },
     getUserInfo: function(app,session,callback) {
         var db = app.get('db');
         var query = 'SELECT users.usr_id, username, email, creation_date FROM sessions, users WHERE session_str = $1 AND sessions.usr_id = users.usr_id';

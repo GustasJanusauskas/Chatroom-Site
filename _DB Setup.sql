@@ -7,6 +7,7 @@ CREATE TABLE users(
 	password varchar(256) NOT NULL,
 	email varchar(256) UNIQUE NOT NULL,
 	creation_date timestamptz DEFAULT NOW(),
+	saved_rooms bigint[] DEFAULT '{}',
 	salt varchar(16),
 	pepper varchar(16),
 	PRIMARY KEY(usr_id)
@@ -45,8 +46,7 @@ roomid AS (
 	INSERT INTO rooms(room_name,author_id)
 	VALUES ('General', (SELECT usr_id FROM adminid) ),
 	('Feedback', (SELECT usr_id FROM adminid) ),
-	('Help', (SELECT usr_id FROM adminid) ),
-	RETURNING room_id
+	('Help', (SELECT usr_id FROM adminid) )
 )
 INSERT INTO sessions(usr_id,session_str)
 VALUES( (SELECT usr_id FROM adminid) ,NULL);

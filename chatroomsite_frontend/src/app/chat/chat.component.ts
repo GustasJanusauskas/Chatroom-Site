@@ -16,12 +16,14 @@ import { MessagingService } from "../services/messaging.service";
 })
 export class ChatComponent implements OnInit {
   currentRoom: Room = new Room('Loading..');
-  rooms: Room[] = [];
+  rooms: Room[] = []; //Search room list
+  favourites: Room[] = []; //Favourite room list
   messages: Message[] = [];
 
   messageInput: string = '';
   searchInput: string = '';
 
+  //UI
   lastSearchCharacterInput: number = Number.NaN;
   showCreateNewRoomCard: boolean = false;
 
@@ -33,7 +35,7 @@ export class ChatComponent implements OnInit {
     setInterval(() => {
       if (this.lastSearchCharacterInput + 250 < Date.now() && this.searchInput.length > 2) {
         this.userdataService.searchRooms(this.searchInput.toLowerCase()).subscribe(data => {
-          this.rooms = data;
+          this.rooms = this.processRooms(data);
 
           //if exact searchInput is not returned (not present in db), show the 'create new room' card.
           this.showCreateNewRoomCard = !this.rooms.find( (value) => {
@@ -42,13 +44,14 @@ export class ChatComponent implements OnInit {
         });
         this.lastSearchCharacterInput = Number.NaN;
       }
-      else if (this.searchInput.length === 0) {
-        //Default rooms, shown when search field is empty, IDs must be accurate!
-        this.rooms = [
+      else if (this.lastSearchCharacterInput + 250 < Date.now() && this.searchInput.length <= 2) {
+        //Default rooms, shown when search field is empty
+        this.rooms = this.processRooms([
           new Room('General',1),
           new Room('Feedback',2),
           new Room('Help',3)
-        ];
+        ]);
+        this.lastSearchCharacterInput = Number.NaN;
       }
     },125);
 
@@ -59,6 +62,16 @@ export class ChatComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    //Update favourites
+    this.getFavouritesList( () => {
+      //Then set default rooms
+      this.rooms = this.processRooms([
+        new Room('General',1),
+        new Room('Feedback',2),
+        new Room('Help',3)
+      ]);
+    });
+
     //Must wait for websock service to initialise
     setTimeout(() => {
       //Connect to default general room, must set ID correctly here!
@@ -139,8 +152,49 @@ export class ChatComponent implements OnInit {
     this.messagingService.messages.next(msg);
   }
 
+  saveRoom(room:Room, save:boolean = true): void {
+    this.userdataService.changeFavourite(HelperFunctionsService.getCookie('session') || '',room.id,save).subscribe( data => {
+      if (data.error) {
+        this.snackbar.open(data.error,'OK');
+      }
+      else {
+        //Update clientside lists
+        room.favourited = save;
+        if (save) this.favourites.push(room);
+        else this.favourites.splice(this.favourites.findIndex( (value) => {value.id === room.id}),1);
+
+        this.snackbar.open(save ? 'Room favourited!' : 'Room removed from favourites.','OK');
+      }
+    });
+  }
+
+  processRooms(rooms:Room[]): Room[] {
+    if (!this.getCookie('session')) return rooms;
+
+    //Set each room's favourite status, make sure id is not string here
+    for (let i = 0; i < rooms.length; i++) {
+      rooms[i].favourited = this.favourites.find( (value) => { return value.id === rooms[i].id;} ) !== undefined;
+    }
+
+    return rooms;
+  }
+
+  getFavouritesList(callback?: Function): void {
+    this.userdataService.getFavourites(HelperFunctionsService.getCookie('session') || '').subscribe( data => {
+      this.favourites = data;
+
+      if (callback) callback();
+    });
+  }
 
   //MISC//
+  tabChange(newTabIndex: number): void {
+    if (newTabIndex === 1) {
+      //Get users' favourites list
+      this.getFavouritesList();
+    }
+  }
+
   searchUpdate(): void {
     this.lastSearchCharacterInput = Date.now();
   }

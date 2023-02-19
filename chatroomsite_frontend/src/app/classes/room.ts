@@ -4,6 +4,7 @@ export class Room {
     name: string = '';
     author?: string = '';
     imagePath?: string = '';
+    favourited?: boolean = false;
 
     constructor(n:string = '', i: number = -1) {
         this.name = n;

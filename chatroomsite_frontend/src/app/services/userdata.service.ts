@@ -39,4 +39,14 @@ export class UserdataService {
     var data = {session,name:roomName};
     return this.http.post<any>('/createroom',data,httpOptions);
   }
+
+  getFavourites(session: string): Observable<any> {
+    var data = {session};
+    return this.http.post<any>('/getfavourites',data,httpOptions);
+  }
+
+  changeFavourite(session: string, roomID: number, addRoom: boolean = true): Observable<any> {
+    var data = {session,id: roomID,add: addRoom};
+    return this.http.post<any>('/changefavourite',data,httpOptions);
+  }
 }

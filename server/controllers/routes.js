@@ -26,18 +26,17 @@ module.exports = {
         var db = req.app.get('db');
         var query = 'SELECT room_id, room_name, users.username FROM rooms, users WHERE LOWER(rooms.room_name) LIKE LOWER($1) AND rooms.author_id = users.usr_id LIMIT 30;';
         var data = [search];
-      
+        
         db.query(query,data, (err, dbres) => {
             if (err) {
                 console.log("DB ERROR SearchRooms: \n" + err);
-                res.json({error:'Database error, please try again.'});
                 return;
             }
 
             const result = [];
             for (let index = 0; index < dbres.rows.length; index++) {
                 result.push({
-                    id:dbres.rows[index].room_id,
+                    id:parseInt(dbres.rows[index].room_id),
                     name: dbres.rows[index].room_name,
                     author: dbres.rows[index].username,
                 });
@@ -102,6 +101,45 @@ module.exports = {
                 res.json({
                     id:dbres.rows[0].room_id
                 });
+            });
+        });
+    },
+    changeFavourite: function(req,res) {
+        helpers.getUserInfo(req.app,req.body.session, user => {
+            if (!user) {
+                res.json({error:'User not found, try logging in again.'});
+                return;
+            }
+
+            helpers.setUserArray(req.app,'saved_rooms',req.body.id,user.id,req.body.add, () => {
+                res.json({error:''});
+            });
+        });
+    },
+    getFavourites: function(req,res) {
+        helpers.getUserInfo(req.app,req.body.session, user => {
+            if (!user) return;
+
+            var db = req.app.get('db');
+            var query = 'SELECT room_id, room_name, users.username FROM rooms, users WHERE rooms.room_id = ANY ((SELECT saved_rooms FROM users WHERE usr_id = $1)::int[]) AND rooms.author_id = users.usr_id;';
+            var data = [user.id];
+
+            db.query(query,data, (err, dbres) => {
+                if (err) {
+                    console.log("DB ERROR GetFavourites: \n" + err);
+                    return;
+                }
+                
+                const result = [];
+                for (let index = 0; index < dbres.rows.length; index++) {
+                    result.push({
+                        id:parseInt(dbres.rows[index].room_id),
+                        name: dbres.rows[index].room_name,
+                        author: dbres.rows[index].username,
+                    });
+                }
+    
+                res.json(result);
             });
         });
     },

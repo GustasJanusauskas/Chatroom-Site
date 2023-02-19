@@ -42,6 +42,8 @@ app.post('/login',routes.login);
 app.post('/searchrooms',routes.searchRooms);
 app.post('/getroominfo',routes.getRoomInfo);
 app.post('/createroom',routes.createRoom);
+app.post('/changefavourite',routes.changeFavourite);
+app.post('/getfavourites',routes.getFavourites);
 
 app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
