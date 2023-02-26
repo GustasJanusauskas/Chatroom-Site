@@ -1,8 +1,10 @@
 # Description
-Chatroom site, rewritten from scratch to use Angular, NodeJS and PostgreSQL.
+Chatroom site, written from scratch with Angular, NodeJS and PostgreSQL.
 ### Features
-- Login/Register system
-- Room system
+- Secure Login/Register system
+- Data efficient websocket messaging system
+- Room system, with search
+- Favourites menu
 - Uploading of files/images
 - Automatic embedding of linked youtube videos/images
 

@@ -118,7 +118,10 @@ module.exports = {
     },
     getFavourites: function(req,res) {
         helpers.getUserInfo(req.app,req.body.session, user => {
-            if (!user) return;
+            if (!user) {
+                res.json([]);
+                return;
+            }
 
             var db = req.app.get('db');
             var query = 'SELECT room_id, room_name, users.username FROM rooms, users WHERE rooms.room_id = ANY ((SELECT saved_rooms FROM users WHERE usr_id = $1)::int[]) AND rooms.author_id = users.usr_id;';
@@ -138,7 +141,7 @@ module.exports = {
                         author: dbres.rows[index].username,
                     });
                 }
-    
+                
                 res.json(result);
             });
         });
