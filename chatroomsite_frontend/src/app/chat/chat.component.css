@@ -21,7 +21,7 @@
 
 .ChatViewport {
     max-height: 42rem;
-    height: calc(100% - 10rem - 0.5rem);
+    height: 42rem;
 }
 
 .ChatMessageBody {

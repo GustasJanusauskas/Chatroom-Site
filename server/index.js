@@ -34,6 +34,7 @@ websock.websocketSetup(app);
 
 //Static File hosting
 app.use(express.static(path.join(__dirname,'..',String.raw`chatroomsite_frontend\dist\chatroomsite_frontend`)));
+app.use('/uploads',express.static(path.join(__dirname,'..',String.raw`uploads`))); //Uploaded files
 
 //Routing
 app.get('/', routes.getroot);

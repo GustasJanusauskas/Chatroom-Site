@@ -93,17 +93,32 @@ export class ChatComponent implements OnInit {
     msg.displaydate = new Date(msg.date).toLocaleString();
 
     //Detect and embed yt videos
-    var ytmatch = /(?:https?:\/\/)?(?:www\.)?youtu\.?be(?:\.com)?\/?.*(?:watch|embed)?(?:.*v=|v\/|\/)([\w\-_]+)\&?/g.exec(msg.body);
+    const ytmatch = /(?:https?:\/\/)?(?:www\.)?youtu\.?be(?:\.com)?\/?.*(?:watch|embed)?(?:.*v=|v\/|\/)([\w\-_]+)\&?/g.exec(msg.body);
     if (ytmatch) msg.displayembedlink = this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube.com/embed/${ytmatch[1]}`);
 
     //Detect and embed images
-    var imgmatch = /(https?:\/\/.*\.(?:png|jpg))/g.exec(msg.body);
+    const imgmatch = /(https?:\/\/.*\.(?:png|jpg))/g.exec(msg.body);
     if (imgmatch) msg.displayimglink = this.sanitizer.bypassSecurityTrustResourceUrl(imgmatch[1]);
 
     //Detect links
     msg.body = msg.body.replace(/(https?:\/\/[^\s]+)/g, function(url) {
-      return '<a href="' + url + '">' + url + '</a>';
+      return `<a href="${url}">${url}</a>`;
     });
+    
+    //Detect uploads (this might get false positives)
+    const uploadmatch = /uploads\\[^\s]+\..*/g.exec(msg.body);
+    if (uploadmatch) {
+      const filename = uploadmatch[0];
+      const fileext = (uploadmatch[0].split('.').pop() || '').toLowerCase();
+      //If image, embed
+      if (fileext == 'jpg') {
+        msg.body = `<a href="${filename}" download="image.jpg">Uploaded image</a>`;
+        msg.displayimglink = this.sanitizer.bypassSecurityTrustResourceUrl(uploadmatch[0]);
+      }
+      else {
+        msg.body = `<a href="${filename}" download="file.${fileext}">Uploaded file</a>`;
+      }
+    }
 
     //Trim message if long, set flag for show more button
     if (msg.body.length > 128 || (msg.body.match(/\n/g) || []).length >= 4) {
@@ -117,6 +132,23 @@ export class ChatComponent implements OnInit {
     return msg;
   }
 
+  uploadFile(event: Event): void {
+    const target = event.target as HTMLInputElement;
+
+    if (target.files) {
+      const reader = new FileReader();
+      reader.readAsDataURL(target.files[0]);
+      reader.onload = () => {
+        const fileBase64str = reader.result?.toString().substring(reader.result?.toString().indexOf(',') + 1);
+        const fileExtension = (target.files![0].name.split('.').pop() || '').toLowerCase();
+
+        const msg = {type:'upload',session:HelperFunctionsService.getCookie('session'),body:fileBase64str,extension:fileExtension};
+
+        this.messagingService.messages.next(msg);
+      }
+    }
+  }
+
   //ROOMS//
   createRoom(): void {
     this.userdataService.createRoom(HelperFunctionsService.getCookie('session') || '',this.searchInput).subscribe( data => {
@@ -125,10 +157,11 @@ export class ChatComponent implements OnInit {
         return;
       }
 
-      this.selectRoom(new Room(this.searchInput,data.id));
+      this.selectRoom(new Room(this.initcap(this.searchInput),data.id));
 
       this.showCreateNewRoomCard = false;
       this.searchInput = '';
+      this.lastSearchCharacterInput = Date.now();
       this.snackbar.open('Room created successfully!','OK');
     });
   }

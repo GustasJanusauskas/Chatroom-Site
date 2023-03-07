@@ -169,8 +169,8 @@ module.exports = {
         }
 
         //Generate password hash
-        var salt = helpers.RandomString(16);
-        var pepper = helpers.RandomString(16);
+        var salt = helpers.randomString(16);
+        var pepper = helpers.randomString(16);
         var finalPass = crypto.createHash('BLAKE2b512').update(salt + req.body.password + pepper).digest('hex');
         
         //Create user row
@@ -243,7 +243,7 @@ module.exports = {
             //Check if password matches DB..
             if (finalPass === dbres.rows[0].password) {
                 //Generate and update session string
-                var session = helpers.RandomString(128);
+                var session = helpers.randomString(128);
                 var innerData = [session,dbres.rows[0].usr_id];
                 var innerQuery = 'UPDATE sessions SET session_str = $1 WHERE usr_id = $2;';
 

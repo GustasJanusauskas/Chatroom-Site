@@ -1,6 +1,9 @@
 # helper files
 _Debug.txt
 
+# user files
+/uploads
+
 # dependencies
 /node_modules
 /.pnp

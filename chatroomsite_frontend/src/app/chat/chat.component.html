@@ -51,12 +51,19 @@
                         </mat-card-actions>
                     </mat-card>
                 </div>
+
                 <mat-form-field class="ChatInput mt-2">
                     <mat-label>Enter message..</mat-label>
                     <textarea matInput maxlength="512" placeholder="Please enter your message." [(ngModel)]="messageInput">
                     </textarea>
                     <mat-hint align="end">{{messageInput.length || 0}}/512</mat-hint>
                 </mat-form-field>
+
+                <input hidden type="file" accept="image/*" (change)="uploadFile($event)" #chatfileinput>
+                <button mat-button color="accent" *ngIf="getCookie('session')" (click)="chatfileinput.click()">
+                    <mat-icon>upload</mat-icon>
+                </button>
+
                 <button mat-button color="primary" class="ChatInput mt-2" [disabled]="!getCookie('session')" (click)="sendMessage()">
                     <mat-icon>send</mat-icon>
                     &ThickSpace; {{getCookie('session') ? 'Send message' : 'Please log in to send a message.'}}

@@ -52,12 +52,31 @@ module.exports = {
 
         return ``;
     },
-    RandomString: function(length) {
+    randomString: function(length) {
         var pool = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         var result = "";
         for (var x = 0; x < length;x++) {
         result += pool.charAt(Math.random() * pool.length - 1);
         }
         return result;
+    },
+    verifyImageBase64: function(bufferString) {
+        var result = false;
+      
+        //png,jpeg,bmp,gif87a,gif89a,tiff LE,tiff BE
+        var allowedFormats = ['89504E470D0A1A0A','FFD8FF','424D','474946383761','474946383961','49492A00','4D4D002A'];
+      
+        for (var x = 0; x < allowedFormats.length; x++) {
+      
+          if (Buffer.from(bufferString,'base64').subarray(0,allowedFormats[x].length / 2).toString('hex').toUpperCase() == allowedFormats[x]) {
+            result = true;
+            break;
+          }
+        }
+      
+        return result;
+    },
+    toDateUniqueString: function(date) {
+        return date.toISOString().replaceAll('-','').replaceAll(':','').replaceAll('.','');
     }
 };
