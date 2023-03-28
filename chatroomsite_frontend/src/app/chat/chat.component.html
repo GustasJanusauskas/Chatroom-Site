@@ -41,7 +41,7 @@
                         <mat-card-content>
                             <p class="ChatMessageBody" [innerHTML]="message.displaybody"></p>
                             <a class="ChatMessageLink" (click)="showFullMessage(message)" *ngIf="message.displaymorebtn">Read full message..<br></a>
-                            <img class="ChatMessageImg" [src]="message.displayimglink" *ngIf="message.displayimglink" />
+                            <img class="ChatMessageImg" [src]="message.displayimglink" onerror="this.onerror=null; this.src='assets/imageMissing.png'" alt="User uploaded image." *ngIf="message.displayimglink" />
                             <iframe width="560" height="315" [src]="message.displayembedlink" *ngIf="message.displayembedlink" frameborder="0" allowfullscreen></iframe>
 
                             <mat-card-subtitle>Sent {{message.displaydate}}</mat-card-subtitle>
@@ -59,9 +59,10 @@
                     <mat-hint align="end">{{messageInput.length || 0}}/512</mat-hint>
                 </mat-form-field>
 
-                <input hidden type="file" accept="image/*" (change)="uploadFile($event)" #chatfileinput>
+                <input hidden type="file" accept="*" (change)="uploadFile($event)" #chatfileinput>
                 <button mat-button color="accent" *ngIf="getCookie('session')" (click)="chatfileinput.click()">
                     <mat-icon>upload</mat-icon>
+                    &ThickSpace; Upload..
                 </button>
 
                 <button mat-button color="primary" class="ChatInput mt-2" [disabled]="!getCookie('session')" (click)="sendMessage()">
