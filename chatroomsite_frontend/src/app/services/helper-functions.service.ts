@@ -7,6 +7,15 @@ export class HelperFunctionsService {
 
   constructor() { }
 
+  static randomString(length:number) {
+    var pool = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    var result = "";
+    for (var x = 0; x < length;x++) {
+    result += pool.charAt(Math.random() * pool.length - 1);
+    }
+    return result;
+  }
+
   static formatToPSQLTime(time: Date) {
     var amPM = 'am';
     if (time.getHours() > 12) {

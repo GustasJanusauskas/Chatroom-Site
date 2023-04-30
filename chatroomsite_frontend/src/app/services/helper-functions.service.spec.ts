@@ -13,4 +13,8 @@ describe('HelperFunctionsService', () => {
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
+
+  it('should generate random strings', () => {
+    expect(HelperFunctionsService.randomString(50)).not.toBe(HelperFunctionsService.randomString(100));
+  });
 });

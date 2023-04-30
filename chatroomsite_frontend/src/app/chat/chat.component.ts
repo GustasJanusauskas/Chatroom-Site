@@ -89,6 +89,9 @@ export class ChatComponent implements OnInit {
   }
 
   processMessage(msg: Message): Message {
+    //If no date exists, assume current date
+    if (msg.date === Date.prototype) msg.date = new Date();
+
     //Format date
     msg.displaydate = new Date(msg.date).toLocaleString();
 
@@ -105,7 +108,7 @@ export class ChatComponent implements OnInit {
       return `<a href="${url}">${url}</a>`;
     });
     
-    //Detect uploads (this might get false positives)
+    //Detect uploads (this might get false positives in edge cases)
     const uploadmatch = /uploads\\[^\s]+\..*/g.exec(msg.body);
     if (uploadmatch) {
       const filename = uploadmatch[0];
